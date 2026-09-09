@@ -104,6 +104,63 @@ public static class ApiEndpoints
         })
         .WithTags("Fraud Rules");
 
+        // PUT: Update an existing Fraud Rule
+        app.MapPut("/api/v1/rules/{id:int}", async (int id, FraudRule rule) =>
+        {
+            if (string.IsNullOrWhiteSpace(rule.RuleName) || string.IsNullOrWhiteSpace(rule.FieldName))
+            {
+                return Results.BadRequest(new { Error = "RuleName and FieldName are required fields." });
+            }
+
+            using var db = new MySqlConnection(connectionString);
+
+            var sql = @"UPDATE FraudRules 
+                        SET RuleName = @RuleName, 
+                            FieldName = @FieldName, 
+                            Operator = @Operator, 
+                            ThresholdValue = @ThresholdValue, 
+                            IsActive = @IsActive 
+                        WHERE RuleId = @RuleId;";
+
+            var rowsAffected = await db.ExecuteAsync(sql, new
+            {
+                RuleId = id,
+                rule.RuleName,
+                rule.FieldName,
+                rule.Operator,
+                rule.ThresholdValue,
+                rule.IsActive
+            });
+
+            if (rowsAffected == 0)
+            {
+                return Results.NotFound(new { Error = $"Fraud rule with ID {id} was not found." });
+            }
+
+            rule.RuleId = id;
+            return Results.Ok(rule);
+        })
+        .WithName("UpdateFraudRule")
+        .WithTags("Fraud Rules");
+
+        // DELETE: Remove a Fraud Rule by ID
+        app.MapDelete("/api/v1/rules/{id:int}", async (int id) =>
+        {
+            using var db = new MySqlConnection(connectionString);
+
+            var sql = "DELETE FROM FraudRules WHERE RuleId = @RuleId;";
+            var rowsAffected = await db.ExecuteAsync(sql, new { RuleId = id });
+
+            if (rowsAffected == 0)
+            {
+                return Results.NotFound(new { Error = $"Fraud rule with ID {id} was not found." });
+            }
+
+            return Results.Ok(new { Message = $"Fraud rule with ID {id} was successfully deleted." });
+        })
+        .WithName("DeleteFraudRule")
+        .WithTags("Fraud Rules");
+
         // Alerts Endpoint
         app.MapGet("/api/v1/alerts", async () =>
         {

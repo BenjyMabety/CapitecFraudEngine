@@ -7,6 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Register CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
+
 // Register Engine Evaluators
 builder.Services.AddSingleton<IFraudRuleEvaluator, NumericRuleEvaluator>();
 builder.Services.AddSingleton<IFraudRuleEvaluator, StringRuleEvaluator>();
@@ -20,6 +32,9 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// Use CORS
+app.UseCors("AllowAngularFrontend");
 
 // Map Route Handlers
 app.MapEndpoints();

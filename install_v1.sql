@@ -47,6 +47,14 @@ CREATE TABLE IF NOT EXISTS FraudAlerts (
 INSERT INTO FraudRules (RuleName, FieldName, Operator, ThresholdValue, IsActive)
 VALUES ('High Value Withdrawal Check', 'Amount', '<', '-50000', TRUE)
 ON DUPLICATE KEY UPDATE RuleName=RuleName;
+-- Seed Additional Real-World Amount-Based Fraud Rules
+INSERT INTO FraudRules (RuleName, FieldName, Operator, ThresholdValue, IsActive)
+VALUES 
+  ('Large Outbound Payment Alert', 'Amount', '<', '-100000.00', TRUE),
+  ('Card Testing Micro-Transaction Alert', 'Amount', '>', '-10.00', TRUE),
+  ('High-Value Inbound Deposit Check', 'Amount', '>', '250000.00', TRUE),
+  ('Zero-Value Authorization Attempt', 'Amount', '==', '0.00', TRUE)
+ON DUPLICATE KEY UPDATE RuleName=RuleName;
 
 -- Create Users Table
 CREATE TABLE IF NOT EXISTS Users (

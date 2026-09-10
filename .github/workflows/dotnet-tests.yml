@@ -21,23 +21,16 @@ jobs:
         ref: 'master'
         path: 'FraudEngine.Tests'
 
-    - name: Fix Test Project Path
-      run: |
-        if [ -f "FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj" ]; then
-          rsync -a FraudEngine.Tests/FraudEngine.Tests/ FraudEngine.Tests/
-          rm -rf FraudEngine.Tests/FraudEngine.Tests
-        fi
-
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore Dependencies
-      run: dotnet restore CapitecFraudEngine.sln
+    - name: Restore Main Engine
+      run: dotnet restore CapitecFraudEngine.csproj
 
-    - name: Build Solution
-      run: dotnet build CapitecFraudEngine.sln --no-restore --configuration Release
+    - name: Build Main Engine
+      run: dotnet build CapitecFraudEngine.csproj --no-restore --configuration Release
 
-    - name: Run xUnit Tests
-      run: dotnet test CapitecFraudEngine.sln --no-build --configuration Release --verbosity normal
+    - name: Restore and Run Tests
+      run: dotnet test FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj --configuration Release --verbosity normal

@@ -14,12 +14,12 @@ jobs:
     - name: Checkout Main Repository
       uses: actions/checkout@v4
 
-    - name: Checkout Test Repository
+    - name: Checkout Test Repository Outside Main Source
       uses: actions/checkout@v4
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
         ref: 'master'
-        path: 'FraudEngine.Tests'
+        path: '../FraudEngine.Tests'
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
@@ -33,4 +33,4 @@ jobs:
       run: dotnet build CapitecFraudEngine.csproj --no-restore --configuration Release
 
     - name: Restore and Run Tests
-      run: dotnet test FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj --configuration Release --verbosity normal
+      run: dotnet test ../FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj --configuration Release --verbosity normal

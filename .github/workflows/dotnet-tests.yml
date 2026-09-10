@@ -19,7 +19,7 @@ jobs:
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
         path: 'FraudEngine.Tests'
-        ref: 'main'
+        ref: 'master'
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4

@@ -18,8 +18,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
-        path: 'FraudEngine.Tests'
         ref: 'master'
+        path: '.'
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4

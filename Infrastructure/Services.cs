@@ -64,6 +64,65 @@ public class ArchiveService
     }
 }
 
+public class DeletedArchivesService : BackgroundService
+{
+    private readonly string _archiveDir;
+    private readonly TimeSpan _retentionPeriod;
+    private readonly ILogger<DeletedArchivesService> _logger;
+
+    public DeletedArchivesService(IConfiguration configuration, ILogger<DeletedArchivesService> logger)
+    {
+        _logger = logger;
+        _archiveDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "archive");
+        Directory.CreateDirectory(_archiveDir);
+
+        // Read configuration with default falling back to 24 hours for assessment
+        var retentionHours = configuration.GetValue<double>("ArchiveRetentionPeriodHours", 24.0);
+        _retentionPeriod = TimeSpan.FromHours(retentionHours);
+
+        _logger.LogInformation("DeletedArchivesService initialized with retention period of {Hours} hours.", retentionHours);
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            CleanupExpiredArchives();
+
+            // Run check periodically based on retention setting (capped to a minimum of 1 minute)
+            var delayTime = _retentionPeriod < TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : _retentionPeriod;
+            await Task.Delay(delayTime, stoppingToken);
+        }
+    }
+
+    private void CleanupExpiredArchives()
+    {
+        try
+        {
+            if (!Directory.Exists(_archiveDir)) return;
+
+            var archiveFiles = Directory.GetFiles(_archiveDir, "*.zip");
+            var thresholdDate = DateTime.UtcNow.Subtract(_retentionPeriod);
+
+            foreach (var filePath in archiveFiles)
+            {
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.LastWriteTimeUtc < thresholdDate)
+                {
+                    _logger.LogInformation("Deleting expired archive file: {FileName} (Last Modified: {LastModifiedUtc})",
+                        fileInfo.Name, fileInfo.LastWriteTimeUtc);
+
+                    File.Delete(filePath);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred during archive cleanup processing.");
+        }
+    }
+}
+
 public class FileCollectorService : BackgroundService
 {
     private readonly string _collectorDir;
@@ -159,9 +218,9 @@ public class FileCollectorService : BackgroundService
                     TransactionId = parts[0],
                     AccountNumber = parts[1],
                     AccountName = parts[2],
-                    TransactionDate = DateTime.Parse(parts[3], CultureInfo.InvariantCulture), // <--- InvariantCulture
-                    Amount = decimal.Parse(parts[4], CultureInfo.InvariantCulture),            // <--- InvariantCulture
-                    TransactionType = parts[5],
+                    TransactionDate = DateTime.Parse(parts[3], CultureInfo.InvariantCulture),
+                    Amount = decimal.Parse(parts[4], CultureInfo.InvariantCulture),
+                    TransactionType = TransactionTypeConstants.FromString(parts[5]),
                     Merchant = parts[6]
                 });
             }
@@ -183,15 +242,26 @@ public class FileCollectorService : BackgroundService
             }
 
             // 4. Evaluate Fraud Rules
-            var activeRules = await db.QueryAsync<FraudRule>("SELECT * FROM FraudRules WHERE IsActive = TRUE");
+            // 4. Evaluate Fraud Rules
+            var activeRules = (await db.QueryAsync<FraudRule>("SELECT * FROM FraudRules WHERE IsActive = TRUE")).ToList();
+
             foreach (var record in records)
             {
                 var brokenRuleIds = _fraudEngine.EvaluateRecord(record, activeRules);
                 foreach (var ruleId in brokenRuleIds)
                 {
+                    // 1. Get the matching rule object from activeRules
+                    var matchedRule = activeRules.FirstOrDefault(r => r.RuleId == ruleId);
+                    var ruleName = matchedRule?.RuleName ?? "Unknown Rule";
+
+                    // 2. Save alert to DB
                     await db.ExecuteAsync(
                         "INSERT INTO FraudAlerts (TransactionId, RuleId) VALUES (@TransactionId, @RuleId)",
                         new { TransactionId = record.TransactionId, RuleId = ruleId });
+
+                    // 3. Pipe fraud alert to ILogger log file
+                    _logger.LogWarning("[FRAUD ALERT RAISED] Rule Broken: {RuleName} (RuleID: {RuleId}) | Account: {AccountNumber} | TxID: {TransactionId} | Amount: {Amount}",
+                        ruleName, ruleId, record.AccountNumber, record.TransactionId, record.Amount);
                 }
             }
 

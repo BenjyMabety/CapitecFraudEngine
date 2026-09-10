@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Transactions (
     AccountName VARCHAR(100) NOT NULL,
     TransactionDate DATETIME NOT NULL,
     Amount DECIMAL(18, 2) NOT NULL,
-    TransactionType VARCHAR(20) NOT NULL,
+    TransactionType INT NOT NULL,
     Merchant VARCHAR(100),
     FOREIGN KEY (FileId) REFERENCES ProcessedFiles(FileId) ON DELETE CASCADE
 );

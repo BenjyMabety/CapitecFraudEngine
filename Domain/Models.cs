@@ -17,6 +17,33 @@ public class ProcessedFile
     public int RecordCount { get; set; }
 }
 
+public static class TransactionTypeConstants
+{
+    public const int Deposit = 1;
+    public const int Withdrawal = 2;
+    public const int Transfer = 3;
+    public const int Payment = 4;
+    public const int Unknown = 0;
+
+    public static int FromString(string typeStr) => typeStr?.Trim().ToLowerInvariant() switch
+    {
+        "deposit" => Deposit,
+        "withdrawal" => Withdrawal,
+        "transfer" => Transfer,
+        "payment" => Payment,
+        _ => Unknown
+    };
+
+    public static string ToString(int typeId) => typeId switch
+    {
+        Deposit => "Deposit",
+        Withdrawal => "Withdrawal",
+        Transfer => "Transfer",
+        Payment => "Payment",
+        _ => "Unknown"
+    };
+}
+
 public class TransactionRecord
 {
     public string TransactionId { get; set; } = string.Empty;
@@ -25,7 +52,7 @@ public class TransactionRecord
     public string AccountName { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }
     public decimal Amount { get; set; }
-    public string TransactionType { get; set; } = string.Empty;
+    public int TransactionType { get; set; }
     public string Merchant { get; set; } = string.Empty;
 }
 

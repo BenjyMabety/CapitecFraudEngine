@@ -1,5 +1,6 @@
 using CapitecFraudEngine.Api;
 using CapitecFraudEngine.Infrastructure;
+using NReco.Logging.File;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,9 @@ builder.Services.AddSingleton<FraudEvaluationEngine>();
 // Register ETL & Archive Services
 builder.Services.AddSingleton<ArchiveService>();
 builder.Services.AddHostedService<FileCollectorService>();
+builder.Services.AddHostedService<DeletedArchivesService>();
+
+builder.Logging.AddFile($"data/logs/app_{DateTime.UtcNow:yyyyMMdd}.log");
 
 var app = builder.Build();
 

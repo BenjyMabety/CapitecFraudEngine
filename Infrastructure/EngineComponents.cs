@@ -41,17 +41,26 @@ public class StringRuleEvaluator : IFraudRuleEvaluator
 
     public bool IsBroken(TransactionRecord record, FraudRule rule)
     {
-        var actualValue = rule.FieldName.ToLower() switch
+        if (rule.FieldName.Equals("Merchant", StringComparison.OrdinalIgnoreCase))
         {
-            "type" or "transactiontype" => record.TransactionType,
-            "merchant" => record.Merchant,
-            _ => string.Empty
-        };
+            return rule.Operator switch
+            {
+                "==" => record.Merchant.Equals(rule.ThresholdValue, StringComparison.OrdinalIgnoreCase),
+                "!=" => !record.Merchant.Equals(rule.ThresholdValue, StringComparison.OrdinalIgnoreCase),
+                _ => false
+            };
+        }
+
+        // Handles TransactionType evaluation (supports comparison by integer ID or string name)
+        var actualTypeId = record.TransactionType;
+        var thresholdTypeId = int.TryParse(rule.ThresholdValue, out var parsedId)
+            ? parsedId
+            : TransactionTypeConstants.FromString(rule.ThresholdValue);
 
         return rule.Operator switch
         {
-            "==" => actualValue.Equals(rule.ThresholdValue, StringComparison.OrdinalIgnoreCase),
-            "!=" => !actualValue.Equals(rule.ThresholdValue, StringComparison.OrdinalIgnoreCase),
+            "==" => actualTypeId == thresholdTypeId,
+            "!=" => actualTypeId != thresholdTypeId,
             _ => false
         };
     }

@@ -17,13 +17,13 @@ jobs:
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x' # Adjust to match your project's target .NET framework
+        dotnet-version: '8.0.x'
 
     - name: Restore Dependencies
-      run: dotnet restore
+      run: dotnet restore CapitecFraudEngine.sln # Replace with your actual .sln filename if different
 
     - name: Build Solution
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build CapitecFraudEngine.sln --no-restore --configuration Release
 
     - name: Run xUnit Tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      run: dotnet test CapitecFraudEngine.sln --no-build --configuration Release --verbosity normal

@@ -23,8 +23,9 @@ jobs:
 
     - name: Fix Test Project Path
       run: |
-        if [ -d "FraudEngine.Tests/FraudEngine.Tests" ]; then
-          mv FraudEngine.Tests/FraudEngine.Tests/* FraudEngine.Tests/
+        if [ -f "FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj" ]; then
+          rsync -a FraudEngine.Tests/FraudEngine.Tests/ FraudEngine.Tests/
+          rm -rf FraudEngine.Tests/FraudEngine.Tests
         fi
 
     - name: Setup .NET SDK

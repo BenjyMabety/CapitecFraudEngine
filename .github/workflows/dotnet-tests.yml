@@ -13,6 +13,8 @@ jobs:
     steps:
     - name: Checkout Main Repository
       uses: actions/checkout@v4
+      with:
+        path: 'CapitecFraudEngine'
 
     - name: Checkout Test Repository
       uses: actions/checkout@v4
@@ -27,10 +29,10 @@ jobs:
         dotnet-version: '8.0.x'
 
     - name: Restore Main Engine
-      run: dotnet restore CapitecFraudEngine.csproj
+      run: dotnet restore CapitecFraudEngine/CapitecFraudEngine.csproj
 
     - name: Build Main Engine
-      run: dotnet build CapitecFraudEngine.csproj --no-restore --configuration Release /p:DefaultItemExcludes="FraudEngine.Tests/**"
+      run: dotnet build CapitecFraudEngine/CapitecFraudEngine.csproj --no-restore --configuration Release
 
     - name: Restore and Run Tests
       run: |

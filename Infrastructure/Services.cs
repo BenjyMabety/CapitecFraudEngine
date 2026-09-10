@@ -16,13 +16,35 @@ public static class DummyFileGenerator
         Directory.CreateDirectory(targetDir);
         var filePath = Path.Combine(targetDir, $"transactions_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv");
 
-        var rows = new[]
+        var rows = new List<string>
         {
-            "TransactionId,AccountNumber,AccountName,TransactionDate,Amount,TransactionType,Merchant",
-            $"TX{Guid.NewGuid().ToString()[..8]},ACC1001,Ben Mbete,2026-09-07T10:00:00Z,500.00,Deposit,Salary",
-            $"TX{Guid.NewGuid().ToString()[..8]},ACC1001,Ben Mbete,2026-09-07T10:05:00Z,-85000.00,Withdrawal,Crypto Exchange",
-            $"TX{Guid.NewGuid().ToString()[..8]},ACC1002,Sarah Connor,2026-09-07T10:10:00Z,-250.00,Withdrawal,Coffee Shop"
+            "TransactionId,AccountNumber,AccountName,TransactionDate,Amount,TransactionType,Merchant"
         };
+
+        var baseTime = DateTime.UtcNow;
+
+        // 10 varied records guaranteed to cover all transaction types (Deposit, Withdrawal, Transfer, Payment)
+        var sampleRecords = new[]
+        {
+            new { Acc = "ACC1001", Name = "Ben Mbete",      Type = "Deposit",    Amt = "15000.00",  Merchant = "Payroll Corp",     OffsetMin = -60 },
+            new { Acc = "ACC1001", Name = "Ben Mbete",      Type = "Withdrawal", Amt = "-85000.00", Merchant = "Crypto Exchange",  OffsetMin = -55 },
+            new { Acc = "ACC1002", Name = "Sarah Connor",   Type = "Withdrawal", Amt = "-250.00",   Merchant = "Coffee Shop",      OffsetMin = -45 },
+            new { Acc = "ACC1002", Name = "Sarah Connor",   Type = "Transfer",   Amt = "-12500.00", Merchant = "Internal Transfer", OffsetMin = -40 },
+            new { Acc = "ACC1003", Name = "John Smith",     Type = "Payment",    Amt = "-4999.99",  Merchant = "Tech Store Online",OffsetMin = -30 },
+            new { Acc = "ACC1003", Name = "John Smith",     Type = "Deposit",    Amt = "3500.00",   Merchant = "ATM Cash Deposit", OffsetMin = -25 },
+            new { Acc = "ACC1004", Name = "Thabo Mbeki",    Type = "Payment",    Amt = "-120000.00",Merchant = "Luxury Watches Co", OffsetMin = -20 },
+            new { Acc = "ACC1004", Name = "Thabo Mbeki",    Type = "Withdrawal", Amt = "-1500.00",   Merchant = "Local ATM",        OffsetMin = -15 },
+            new { Acc = "ACC1005", Name = "Alice Johnson", Type = "Transfer",   Amt = "-50000.00", Merchant = "Offshore Account", OffsetMin = -10 },
+            new { Acc = "ACC1005", Name = "Alice Johnson", Type = "Payment",    Amt = "-89.50",    Merchant = "Grocery Express",  OffsetMin = -2 }
+        };
+
+        foreach (var r in sampleRecords)
+        {
+            var txId = $"TX{Guid.NewGuid().ToString()[..8].ToUpperInvariant()}";
+            var timestamp = baseTime.AddMinutes(r.OffsetMin).ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+            rows.Add($"{txId},{r.Acc},{r.Name},{timestamp},{r.Amt},{r.Type},{r.Merchant}");
+        }
 
         File.WriteAllLines(filePath, rows);
         return filePath;

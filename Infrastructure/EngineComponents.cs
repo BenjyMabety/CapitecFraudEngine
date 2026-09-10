@@ -16,10 +16,23 @@ public class NumericRuleEvaluator : IFraudRuleEvaluator
 
     public bool IsBroken(TransactionRecord record, FraudRule rule)
     {
-        // Use InvariantCulture to parse the threshold string safely
+        // Parse the threshold string using InvariantCulture
         if (!decimal.TryParse(rule.ThresholdValue, NumberStyles.Any, CultureInfo.InvariantCulture, out var threshold))
             return false;
 
+        // 1. Directional Guard: Money Out (-) vs Money In (+)
+        if (threshold < 0)
+        {
+            // Rule target is negative (outbound/debit). Skip evaluation if transaction is a deposit/credit.
+            if (record.Amount >= 0) return false;
+        }
+        else if (threshold > 0)
+        {
+            // Rule target is positive (inbound/credit). Skip evaluation if transaction is a withdrawal/debit.
+            if (record.Amount <= 0) return false;
+        }
+
+        // 2. Single-rule threshold condition evaluation
         return rule.Operator switch
         {
             ">" => record.Amount > threshold,
@@ -27,6 +40,7 @@ public class NumericRuleEvaluator : IFraudRuleEvaluator
             "==" => record.Amount == threshold,
             ">=" => record.Amount >= threshold,
             "<=" => record.Amount <= threshold,
+            "!=" => record.Amount != threshold,
             _ => false
         };
     }

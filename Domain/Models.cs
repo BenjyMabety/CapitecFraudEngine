@@ -62,7 +62,7 @@ public class FraudRule
     public string RuleName { get; set; } = string.Empty;
     public string FieldName { get; set; } = string.Empty;
     public string Operator { get; set; } = string.Empty;
-    public string ThresholdValue { get; set; } = string.Empty;
+    public string ThresholdValue { get; set; }
     public bool IsActive { get; set; } = true;
 }
 

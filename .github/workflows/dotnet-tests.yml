@@ -11,31 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. Checkout the main repository (CapitecFraudEngine)
     - name: Checkout Main Repository
       uses: actions/checkout@v4
 
-    # 2. Checkout the separate test repository (FraudEngine.Tests) into the expected folder
     - name: Checkout Test Repository
       uses: actions/checkout@v4
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
         path: 'FraudEngine.Tests'
+        ref: 'main'
 
-    # 3. Set up .NET
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    # 4. Restore dependencies across both projects
     - name: Restore Dependencies
       run: dotnet restore CapitecFraudEngine.sln
 
-    # 5. Build solution
     - name: Build Solution
       run: dotnet build CapitecFraudEngine.sln --no-restore --configuration Release
 
-    # 6. Run tests
     - name: Run xUnit Tests
       run: dotnet test CapitecFraudEngine.sln --no-build --configuration Release --verbosity normal

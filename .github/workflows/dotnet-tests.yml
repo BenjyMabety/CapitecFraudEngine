@@ -11,26 +11,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. Checkout main repo into current directory
     - name: Checkout Main Repository
       uses: actions/checkout@v4
 
+    # 2. Checkout test repo into FraudEngine.Tests directory
     - name: Checkout Test Repository
       uses: actions/checkout@v4
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
         ref: 'master'
-        path: '.'
+        path: 'FraudEngine.Tests'
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
+    # 3. Restore, Build, and Test using wildcard path search
     - name: Restore Dependencies
-      run: dotnet restore CapitecFraudEngine.sln
+      run: dotnet restore **/CapitecFraudEngine.sln
 
     - name: Build Solution
-      run: dotnet build CapitecFraudEngine.sln --no-restore --configuration Release
+      run: dotnet build **/CapitecFraudEngine.sln --no-restore --configuration Release
 
     - name: Run xUnit Tests
-      run: dotnet test CapitecFraudEngine.sln --no-build --configuration Release --verbosity normal
+      run: dotnet test **/CapitecFraudEngine.sln --no-build --configuration Release --verbosity normal

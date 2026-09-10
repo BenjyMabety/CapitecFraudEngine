@@ -33,4 +33,7 @@ jobs:
       run: dotnet build CapitecFraudEngine.csproj --no-restore --configuration Release /p:DefaultItemExcludes="FraudEngine.Tests/**"
 
     - name: Restore and Run Tests
-      run: dotnet test FraudEngine.Tests/FraudEngine.Tests/FraudEngine.Tests.csproj --configuration Release --verbosity normal
+      run: |
+        TEST_PROJ=$(find FraudEngine.Tests -name "*.csproj" | head -n 1)
+        echo "Found test project at: $TEST_PROJ"
+        dotnet test "$TEST_PROJ" --configuration Release --verbosity normal

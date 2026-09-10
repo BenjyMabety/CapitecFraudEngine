@@ -19,10 +19,15 @@ jobs:
       with:
         repository: 'BenjyMabety/FraudEngine.Tests'
         ref: 'master'
-        path: 'FraudEngine.Tests'
+        path: 'temp_tests'
 
-    - name: Flatten Test Project Directory
-      run: cp -rf FraudEngine.Tests/FraudEngine.Tests/* FraudEngine.Tests/ || true
+    - name: Align Test Directory Layout
+      run: |
+        mkdir -p FraudEngine.Tests
+        cp -r temp_tests/* FraudEngine.Tests/
+        if [ -d "temp_tests/FraudEngine.Tests" ]; then
+          cp -r temp_tests/FraudEngine.Tests/* FraudEngine.Tests/
+        fi
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4

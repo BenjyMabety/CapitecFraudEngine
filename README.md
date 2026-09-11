@@ -100,35 +100,47 @@ The **FraudEngine.Tests** repository is fully integrated with **GitHub Actions**
 
 ### GitHub Actions Workflow File (`.github/workflows/ci.yml`)
 ```yaml
-name: CI/CD Pipeline
+name: Build and Run FraudEngine Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - name: Checkout Main Repository
+      uses: actions/checkout@v4
+      with:
+        path: 'CapitecFraudEngine'
 
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v3
+    - name: Checkout Test Repository
+      uses: actions/checkout@v4
+      with:
+        repository: 'BenjyMabety/FraudEngine.Tests'
+        ref: 'master'
+        path: 'FraudEngine.Tests'
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Restore Main Engine
+      run: dotnet restore CapitecFraudEngine/CapitecFraudEngine.csproj
 
-    - name: Build solution
-      run: dotnet build --no-restore --configuration Release
+    - name: Build Main Engine
+      run: dotnet build CapitecFraudEngine/CapitecFraudEngine.csproj --no-restore --configuration Release
 
-    - name: Run tests
-      run: dotnet test FraudEngine.Tests/FraudEngine.Tests.csproj --no-build --verbosity normal
+    - name: Restore and Run Tests
+      run: |
+        TEST_PROJ=$(find FraudEngine.Tests -name "*.csproj" | head -n 1)
+        echo "Found test project at: $TEST_PROJ"
+        dotnet test "$TEST_PROJ" --configuration Release --verbosity normal
 ```
 
 

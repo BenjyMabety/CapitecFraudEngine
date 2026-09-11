@@ -82,6 +82,9 @@ The backend uses **MySQL (CapitecFraudDb)** initialized via `install_v1.sql`.
 - Covers evaluation engine, file parsing, and rule logic.
 - Repository: [FraudEngine.Tests](https://github.com/BenjyMabety/FraudEngine.Tests)
 
+### Front End Testing
+- Repository: [fraud.portal](https://github.com/BenjyMabety/fraud-portal)
+
 ---
 
 ## API Reference
@@ -130,7 +133,7 @@ docker run -d --name fraud-portal-app --network capitec-net -p 4200:4200 benmbet
 
 Accessing the Application
 Frontend Portal: http://localhost:4200
-Repository:[fraud.portal] (https://github.com/BenjyMabety/fraud-portal)
+
 
 Seed Data:
 Username:admin

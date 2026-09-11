@@ -185,12 +185,19 @@ Pull and run the complete system (Database, Engine API, and UI Portal) via Docke
 1. Create Docker Network
 ```bash
 docker network create capitec-net
+```
 2. Start MySQL Database Container
+```bash
 docker run --name fraud-db-container --network capitec-net -p 0:3306 -d benmbete08/capitec-fraud-db
+```
 3. Start Backend Fraud Engine Container
+```bash
 docker run -d --name capitec-fraud-app --network capitec-net -p 8080:8080 benmbete08/capitec-fraud-engine
+```
 4. Start Angular UI Portal Container
+```bash
 docker run -d --name fraud-portal-app --network capitec-net -p 4200:4200 benmbete08/fraud-portal-ui
+```
 
 
 Accessing the Application

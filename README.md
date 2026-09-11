@@ -130,6 +130,7 @@ docker run -d --name fraud-portal-app --network capitec-net -p 4200:4200 benmbet
 
 Accessing the Application
 Frontend Portal: http://localhost:4200
+Repository:[fraud.portal] (https://github.com/BenjyMabety/fraud-portal)
 
 Seed Data:
 Username:admin

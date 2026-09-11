@@ -82,6 +82,56 @@ The backend uses **MySQL (CapitecFraudDb)** initialized via `install_v1.sql`.
 - Covers evaluation engine, file parsing, and rule logic.
 - Repository: [FraudEngine.Tests](https://github.com/BenjyMabety/FraudEngine.Tests)
 
+---
+
+## Continuous Integration / Continuous Deployment (CI/CD)
+
+The **FraudEngine.Tests** repository is fully integrated with **GitHub Actions** for automated CI/CD.
+
+### Workflow Overview
+- **Trigger:** Runs automatically on every commit or pull request to the `main` branch.
+- **Pipeline Steps:**
+  1. Checkout repository
+  2. Setup .NET 8 environment
+  3. Restore dependencies
+  4. Build solution
+  5. Run unit and integration tests (`FraudEngine.Tests`)
+  6. Publish test results and artifacts
+
+### GitHub Actions Workflow File (`.github/workflows/ci.yml`)
+```yaml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup .NET 8
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build solution
+      run: dotnet build --no-restore --configuration Release
+
+    - name: Run tests
+      run: dotnet test FraudEngine.Tests/FraudEngine.Tests.csproj --no-build --verbosity normal
+```
+
+
 ### Front End Testing
 - Repository: [fraud.portal](https://github.com/BenjyMabety/fraud-portal)
 
@@ -133,6 +183,7 @@ docker run -d --name fraud-portal-app --network capitec-net -p 4200:4200 benmbet
 
 Accessing the Application
 Frontend Portal: http://localhost:4200
+
 
 
 Seed Data:
